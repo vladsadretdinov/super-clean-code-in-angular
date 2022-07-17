@@ -1,0 +1,7 @@
+<mat-selection-list #usersList (selectionChange)="selectionChanged()">
+  <mat-list-option *ngFor="let user of users" [value]="user" checkboxPosition="before">
+    <h4 matLine>{{user.name + ' ' + user.surname}}</h4>
+    <h5 matLine>{{user.email}}</h5>
+    <mat-divider></mat-divider>
+  </mat-list-option>
+</mat-selection-list>

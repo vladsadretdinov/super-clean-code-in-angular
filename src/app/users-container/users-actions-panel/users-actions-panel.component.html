@@ -1,0 +1,9 @@
+<div fxLayout="row" fxLayoutAlign="space-between center" [formGroup]="form">
+  <mat-checkbox formControlName="selectAll">Select all</mat-checkbox>
+  <button mat-mini-fab color="warn" [disabled]="deleteDisabled">
+    <mat-icon>delete</mat-icon>
+  </button>
+  <mat-form-field appearance="outline" fxFlex="1 1 80%">
+    <input matInput autocomplete="off" placeholder="Search" formControlName="search"/>
+  </mat-form-field>
+</div>
