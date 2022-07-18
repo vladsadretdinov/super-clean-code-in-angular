@@ -9,9 +9,9 @@ import { User } from '../users-store.service';
 })
 export class UsersListComponent implements OnInit {
   @Input() users!: User[];
-  @Input() set selectAll(selectAll: boolean) {
+  @Input() set selectAll(selectAll: { checked: boolean }) {
     if (!this.usersList) return;
-    if (selectAll) {
+    if (selectAll.checked) {
       this.usersList.selectAll();
       this.emitSelectedUsers.emit(this.users);
     } else {
@@ -33,8 +33,4 @@ export class UsersListComponent implements OnInit {
     const selectedUsers = this.usersList.selectedOptions.selected.map(s => s.value);
     this.emitSelectedUsers.emit(selectedUsers);
   }
-
-  // <p>
-  //  Options selected: {{shoes.selectedOptions.selected.length}}
-  // </p>
 }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { User, UsersStoreService } from './users-store.service';
+import { FilterType, User, UsersStoreService } from './users-store.service';
 
 @Component({
   selector: 'app-users-container',
@@ -10,8 +10,14 @@ import { User, UsersStoreService } from './users-store.service';
 })
 export class UsersContainerComponent implements OnInit {
   deleteDisabled$ = this.store.deleteDisabled$;
+  isAllSelected$ = this.store.isAllSelected$;
+  canClear$ = this.store.canClear$;
+  canSelect$ = this.store.canSelect$;
+  canFilterBySelection$ = this.store.canFilterBySelection$;
   selectAll$ = this.store.selectAll$;
   users$ = this.store.filteredUsers$;
+  searchTerm$ = this.store.searchTerm$;
+  canUnfilter$ = this.store.canUnfilter$;
 
   constructor(private store: UsersStoreService) { }
 
@@ -31,9 +37,10 @@ export class UsersContainerComponent implements OnInit {
         { name: 'Caroline', surname: 'Doe', email: 'doe@acme.com' },
         { name: 'Jhon', surname: 'Doe', email: 'doe@acme.com' },
       ],
-      selectAll: false,
+      selectAll: { checked: false },
       selectedUsers: [],
       searchTerm: '',
+      filterType: FilterType.none,
     })
   }
 
@@ -47,5 +54,17 @@ export class UsersContainerComponent implements OnInit {
 
   handleSearch(searchTerm: string) {
     this.store.updateSearchTerm(searchTerm);
+  }
+
+  handleClear() {
+    this.store.clear();
+  }
+
+  handleEmitFilterBySelection() {
+    this.store.filterBySelection();
+  }
+
+  handleEmitUnfilter() {
+    this.store.unfilter();
   }
 }
