@@ -1,6 +1,6 @@
-# Super Clean Code in Angular (feat. @ngrx-component-store) - Part 2 - Setup & Basics
+# Super Clean Code in Angular (feat. @ngrx-component-store) - Part 3 - Adding Complexity
 
-Copy-paste from https://www.youtube.com/watch?v=M0lWGx9QpfU
+Copy-paste from https://www.youtube.com/watch?v=_ByyCa537qs
 
 # SuperCleanCode
 
