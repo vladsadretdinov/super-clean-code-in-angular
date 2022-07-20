@@ -11,8 +11,28 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 })
 export class UsersActionsPanelComponent implements OnInit, OnDestroy {
   @Input() deleteDisabled: boolean;
+  @Input() canClear: boolean;
+  @Input() canFilterBySelection: boolean;
+  @Input() canUnfilter: boolean = true;
+
+  @Input() set searchTerm(searchTerm: string) {
+    this.form.get('search').setValue(searchTerm, { emitEvent: false });
+  }
+
+  @Input() set canSelect(canSelect: boolean) {
+    if (canSelect) this.form.get('selectAll').enable();
+    else this.form.get('selectAll').disable();
+  }
+
+  @Input() set isAllSelected(isAllSelected: boolean) {
+    this.form.get('selectAll').setValue(isAllSelected, { emitEvent: false });
+  }
+
   @Output() emitSelectAll = new EventEmitter<boolean>();
   @Output() emitSearch = new EventEmitter<string>();
+  @Output() emitClear = new EventEmitter<void>();
+  @Output() emitFilterBySelection = new EventEmitter<void>();
+  @Output() emitUnfilter = new EventEmitter<void>();
 
   form = new FormGroup({
     selectAll: new FormControl(false),
@@ -45,4 +65,15 @@ export class UsersActionsPanelComponent implements OnInit, OnDestroy {
     this.unsubscribe.next();
   }
 
+  clear() {
+    this.emitClear.emit();
+  }
+
+  filterBySelection() {
+    this.emitFilterBySelection.emit();
+  }
+
+  unfilter() {
+    this.emitUnfilter.emit();
+  }
 }

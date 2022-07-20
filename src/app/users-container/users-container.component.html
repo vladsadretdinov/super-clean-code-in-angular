@@ -1,5 +1,11 @@
 <div fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="1em" class="users-wrapper" *ngIf="{
   deleteDisabled: deleteDisabled$ | async,
+  isAllSelected: isAllSelected$ | async,
+  canClear: canClear$ | async,
+  canSelect: canSelect$ | async,
+  canUnfilter: canUnfilter$ | async,
+  canFilterBySelection: canFilterBySelection$ | async,
+  searchTerm: searchTerm$ | async,
   users: users$ | async,
   selectAll: selectAll$ | async
 } as asyncData">
@@ -7,8 +13,17 @@
   <mat-divider></mat-divider>
   <app-users-actions-panel
     [deleteDisabled]="asyncData.deleteDisabled"
+    [isAllSelected]="asyncData.isAllSelected"
+    [canClear]="asyncData.canClear"
+    [canSelect]="asyncData.canSelect"
+    [canFilterBySelection]="asyncData.canFilterBySelection"
+    [canUnfilter]="asyncData.canUnfilter"
+    [searchTerm]="asyncData.searchTerm"
     (emitSelectAll)="handleSelectAll($event)"
     (emitSearch)="handleSearch($event)"
+    (emitClear)="handleClear()"
+    (emitFilterBySelection)="handleEmitFilterBySelection()"
+    (emitUnfilter)="handleEmitUnfilter()"
   ></app-users-actions-panel>
   <mat-divider></mat-divider>
   <app-users-list
