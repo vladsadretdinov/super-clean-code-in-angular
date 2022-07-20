@@ -1,0 +1,19 @@
+<div fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="1em" class="users-wrapper" *ngIf="{
+  deleteDisabled: deleteDisabled$ | async,
+  users: users$ | async,
+  selectAll: selectAll$ | async
+} as asyncData">
+  <h1>Users</h1>
+  <mat-divider></mat-divider>
+  <app-users-actions-panel
+    [deleteDisabled]="asyncData.deleteDisabled"
+    (emitSelectAll)="handleSelectAll($event)"
+    (emitSearch)="handleSearch($event)"
+  ></app-users-actions-panel>
+  <mat-divider></mat-divider>
+  <app-users-list
+    [users]="asyncData.users"
+    [selectAll]="asyncData.selectAll"
+    (emitSelectedUsers)="handleSelectedUsers($event)">
+  </app-users-list>
+</div>
