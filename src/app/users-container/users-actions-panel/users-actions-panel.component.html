@@ -16,3 +16,19 @@
     <input matInput autocomplete="off" placeholder="Search" formControlName="search"/>
   </mat-form-field>
 </div>
+<div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="3em">
+  <div matSort (matSortChange)="sortChanged($event)"
+    [matSortDisableClear]="true" matSortActive="createAt" matSortDirection="asc"
+    fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="1em">
+    <p mat-sort-header="createdAt">Date</p>
+    <p mat-sort-header="name">Name</p>
+    <p mat-sort-header="surname">Surname</p>
+    <p mat-sort-header="email">Email</p>
+  </div>
+  <mat-paginator
+    [hidePageSize]="true"
+    [length]="count"
+    [pageSize]="limit"
+    (page)="pageChanged($event)">
+  </mat-paginator>
+</div>

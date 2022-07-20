@@ -1,5 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 import { FilterType, User, UsersStoreService } from './users-store.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-users-container',
@@ -8,7 +11,9 @@ import { FilterType, User, UsersStoreService } from './users-store.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [UsersStoreService]
 })
-export class UsersContainerComponent implements OnInit {
+export class UsersContainerComponent implements OnInit, OnDestroy {
+  unsubscribe = new Subject<void>();
+
   deleteDisabled$ = this.store.deleteDisabled$;
   isAllSelected$ = this.store.isAllSelected$;
   canClear$ = this.store.canClear$;
@@ -18,30 +23,33 @@ export class UsersContainerComponent implements OnInit {
   users$ = this.store.filteredUsers$;
   searchTerm$ = this.store.searchTerm$;
   canUnfilter$ = this.store.canUnfilter$;
+  isLoading$ = this.store.isLoading$;
+  distinctCriteria$ = this.store.distinctCriteria$;
+  limit$ = this.store.limit$;
+  count$ = this.store.count$;
+  error$ = this.store.error$.pipe(filter(e => !!e));
 
-  constructor(private store: UsersStoreService) { }
+  constructor(private store: UsersStoreService, private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
     this.store.setState({
-      users: [
-        { name: 'Jhon', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Maria', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Jhon', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Jhon', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Jhon', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Maria', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Jhon', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Maria', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Jhon', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Caroline', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Caroline', surname: 'Doe', email: 'doe@acme.com' },
-        { name: 'Jhon', surname: 'Doe', email: 'doe@acme.com' },
-      ],
+      users: [],
       selectAll: { checked: false },
       selectedUsers: [],
-      searchTerm: '',
       filterType: FilterType.none,
-    })
+      isLoading: false,
+      count: 0,
+      error: null,
+      criteria: { search: '', limit: 10, page: 1, sortBy: 'name', order: 'asc' }
+    });
+    this.store.listUsers(this.distinctCriteria$);
+    this.error$.pipe(
+      takeUntil(this.unsubscribe)
+    ).subscribe(e => this.snackBar.open(e.message, 'Close', { duration: 2500 }))
+  }
+
+  ngOnDestroy() {
+    this.unsubscribe.next();
   }
 
   handleSelectAll(selectAll: boolean) {
@@ -66,5 +74,13 @@ export class UsersContainerComponent implements OnInit {
 
   handleEmitUnfilter() {
     this.store.unfilter();
+  }
+
+  handleEmitSort(event: { active: string, direction: string }) {
+    this.store.sort(event);
+  }
+
+  handleEmitPageIndex(pageIndex: number) {
+    this.store.updatePage(pageIndex + 1);
   }
 }

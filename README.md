@@ -1,6 +1,6 @@
-# Super Clean Code in Angular (feat. @ngrx-component-store) - Part 3 - Adding Complexity
+# Super Clean Code in Angular (feat. @ngrx-component-store) - Part 4 - Effects & Memoization
 
-Copy-paste from https://www.youtube.com/watch?v=_ByyCa537qs
+Copy-paste from https://www.youtube.com/watch?v=nsfpCTXgpzY
 
 # SuperCleanCode
 

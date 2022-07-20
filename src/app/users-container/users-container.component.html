@@ -6,6 +6,9 @@
   canUnfilter: canUnfilter$ | async,
   canFilterBySelection: canFilterBySelection$ | async,
   searchTerm: searchTerm$ | async,
+  isLoading: isLoading$ | async,
+  limit: limit$ | async,
+  count: count$ | async,
   users: users$ | async,
   selectAll: selectAll$ | async
 } as asyncData">
@@ -19,15 +22,20 @@
     [canFilterBySelection]="asyncData.canFilterBySelection"
     [canUnfilter]="asyncData.canUnfilter"
     [searchTerm]="asyncData.searchTerm"
+    [limit]="asyncData.limit"
+    [count]="asyncData.count"
     (emitSelectAll)="handleSelectAll($event)"
     (emitSearch)="handleSearch($event)"
     (emitClear)="handleClear()"
     (emitFilterBySelection)="handleEmitFilterBySelection()"
     (emitUnfilter)="handleEmitUnfilter()"
+    (emitSort)="handleEmitSort($event)"
+    (emitPageIndex)="handleEmitPageIndex($event)"
   ></app-users-actions-panel>
   <mat-divider></mat-divider>
   <app-users-list
     [users]="asyncData.users"
+    [isLoading]="asyncData.isLoading"
     [selectAll]="asyncData.selectAll"
     (emitSelectedUsers)="handleSelectedUsers($event)">
   </app-users-list>
