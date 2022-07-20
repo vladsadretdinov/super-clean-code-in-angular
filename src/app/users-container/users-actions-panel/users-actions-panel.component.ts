@@ -14,6 +14,8 @@ export class UsersActionsPanelComponent implements OnInit, OnDestroy {
   @Input() canClear: boolean;
   @Input() canFilterBySelection: boolean;
   @Input() canUnfilter: boolean = true;
+  @Input() limit: number;
+  @Input() count: number;
 
   @Input() set searchTerm(searchTerm: string) {
     this.form.get('search').setValue(searchTerm, { emitEvent: false });
@@ -33,6 +35,8 @@ export class UsersActionsPanelComponent implements OnInit, OnDestroy {
   @Output() emitClear = new EventEmitter<void>();
   @Output() emitFilterBySelection = new EventEmitter<void>();
   @Output() emitUnfilter = new EventEmitter<void>();
+  @Output() emitSort = new EventEmitter<{ active: string, direction: string }>();
+  @Output() emitPageIndex = new EventEmitter<number>();
 
   form = new FormGroup({
     selectAll: new FormControl(false),
@@ -75,5 +79,13 @@ export class UsersActionsPanelComponent implements OnInit, OnDestroy {
 
   unfilter() {
     this.emitUnfilter.emit();
+  }
+
+  sortChanged(event: { active: string, direction: string }) {
+    this.emitSort.emit(event);
+  }
+
+  pageChanged($event) {
+    this.emitPageIndex.emit($event.pageIndex);
   }
 }

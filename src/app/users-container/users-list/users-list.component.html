@@ -1,7 +1,14 @@
-<mat-selection-list #usersList (selectionChange)="selectionChanged()">
+<mat-selection-list #usersList (selectionChange)="selectionChanged()" *ngIf="!isLoading && users.length">
   <mat-list-option *ngFor="let user of users" [value]="user" checkboxPosition="before">
     <h4 matLine>{{user.name + ' ' + user.surname}}</h4>
     <h5 matLine>{{user.email}}</h5>
     <mat-divider></mat-divider>
   </mat-list-option>
 </mat-selection-list>
+
+<div *ngIf="!isLoading && !users.length">
+  <p>There are no users...</p>
+</div>
+<div fxLayout="row" fxLayoutAlign="center center" class="i-need-space" *ngIf="isLoading">
+  <mat-spinner></mat-spinner>
+</div>

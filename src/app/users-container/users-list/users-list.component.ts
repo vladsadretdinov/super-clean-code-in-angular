@@ -19,6 +19,7 @@ export class UsersListComponent implements OnInit {
       this.emitSelectedUsers.emit([]);
     }
   }
+  @Input() isLoading: boolean = false;
 
   @Output() emitSelectedUsers = new EventEmitter<User[]>();
 

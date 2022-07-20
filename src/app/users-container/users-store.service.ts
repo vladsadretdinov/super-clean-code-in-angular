@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable } from 'rxjs';
+import { Observable, catchError, EMPTY } from 'rxjs';
+import { UsersService, ListCriteria } from '../users.service';
+import { switchMap, tap } from 'rxjs/operators';
 
 export enum FilterType {
   none = 'none',
@@ -18,8 +20,11 @@ export interface UsersState {
   users: User[];
   selectAll: { checked: boolean };
   selectedUsers: User[];
-  searchTerm: string;
   filterType: FilterType;
+  isLoading: boolean;
+  count: number;
+  error: any;
+  criteria: ListCriteria;
 }
 
 @Injectable()
@@ -28,33 +33,45 @@ export class UsersStoreService extends ComponentStore<UsersState> {
   users$: Observable<User[]> = this.select(state => state.users);
   selectedUsers$: Observable<User[]> = this.select(state => state.selectedUsers);
   selectAll$: Observable<{ checked: boolean }> = this.select(state => state.selectAll);
-  searchTerm$: Observable<string> = this.select(state => state.searchTerm);
   filterType$: Observable<string> = this.select(state => state.filterType);
+  isLoading$: Observable<boolean> = this.select(state => state.isLoading);
+  count$: Observable<number> = this.select(state => state.count);
+  error$: Observable<any> = this.select(state => state.error);
+  criteria$: Observable<ListCriteria> = this.select(state => state.criteria);
+  searchTerm$: Observable<string> = this.select(state => state.criteria.search);
+  limit$: Observable<number> = this.select(state => state.criteria.limit);
+  page$: Observable<number> = this.select(state => state.criteria.page);
+  sortBy$: Observable<string> = this.select(state => state.criteria.sortBy);
+  order$: Observable<string> = this.select(state => state.criteria.order);
 
   // combined selectors:
+  distinctCriteria$: Observable<ListCriteria> = this.select(
+    this.searchTerm$,
+    this.page$,
+    this.limit$,
+    this.sortBy$,
+    this.order$,
+    (search, page, limit, sortBy, order) => ({ search, page, limit, sortBy, order })
+  );
+
+  selectedLength$: Observable<number> = this.select(
+    this.selectedUsers$,
+    (selectedUsers) => selectedUsers.length
+  )
+
   deleteDisabled$: Observable<boolean> = this.select(
     this.selectedUsers$,
     (selectedUsers) => !!selectedUsers && !selectedUsers.length
-  );
-
-  filteredBySearch$: Observable<User[]> = this.select(
-    this.users$,
-    this.searchTerm$,
-    (users, searchTerm) => {
-      if (!searchTerm.length) return users;
-      else return users.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    }
   );
 
   filteredUsers$: Observable<User[]> = this.select(
     this.filterType$,
     this.users$,
     this.selectedUsers$,
-    this.filteredBySearch$,
-    (filteredType, users, selectedUsers, filteredBySearch) => {
+    (filteredType, users, selectedUsers) => {
       switch (filteredType) {
+        case FilterType.search:
         case FilterType.none: return users;
-        case FilterType.search: return filteredBySearch;
         case FilterType.selection: return selectedUsers;
       }
     }
@@ -67,9 +84,9 @@ export class UsersStoreService extends ComponentStore<UsersState> {
   );
 
   canClear$: Observable<boolean> = this.select(
-    this.selectedUsers$,
+    this.selectedLength$,
     this.isAllSelected$,
-    (selectedUsers, isAllSelected) => !!selectedUsers.length && !isAllSelected
+    (selectedLength, isAllSelected) => !!selectedLength && !isAllSelected
   );
 
   canSelect$: Observable<boolean> = this.select(
@@ -87,7 +104,7 @@ export class UsersStoreService extends ComponentStore<UsersState> {
     (filterType) => filterType !== FilterType.none
   );
 
-  constructor() {
+  constructor(private usersService: UsersService) {
     super()
   }
 
@@ -102,8 +119,10 @@ export class UsersStoreService extends ComponentStore<UsersState> {
     this.patchState({ selectedUsers })
   }
 
-  updateSearchTerm(searchTerm: string) {
-    this.patchState({ searchTerm, filterType: FilterType.search })
+  updateSearchTerm(search: string) {
+    const currentCriteria = this.get(state => state.criteria);
+    const criteria = { ...currentCriteria, search };
+    this.patchState({ filterType: FilterType.search, criteria })
   }
 
   clear() {
@@ -111,12 +130,40 @@ export class UsersStoreService extends ComponentStore<UsersState> {
   }
 
   filterBySelection() {
-    this.patchState({ filterType: FilterType.selection });
+    const currentCriteria = this.get(state => state.criteria);
+    const criteria = { ...currentCriteria, search: '' };
+    this.patchState({ filterType: FilterType.selection, criteria });
   }
 
   unfilter() {
-    this.patchState({ filterType: FilterType.none, searchTerm: '' });
+    const currentCriteria = this.get(state => state.criteria);
+    const criteria = { ...currentCriteria, search: '' };
+    this.patchState({ filterType: FilterType.none, criteria });
+  }
+
+  sort(event: { active: string, direction: string }) {
+    const currentCriteria = this.get(state => state.criteria);
+    const criteria = { ...currentCriteria, sortBy: event.active, order: event.direction };
+    this.patchState({ criteria });
+  }
+
+  updatePage(page: number) {
+    const currentCriteria = this.get(state => state.criteria);
+    const criteria = { ...currentCriteria, page };
+    this.patchState({ criteria });
   }
 
   //effects:
+  readonly listUsers = this.effect((criteria$: Observable<ListCriteria>) => {
+    return criteria$.pipe(
+      tap(() => this.patchState({ isLoading: true })),
+      switchMap((criteria) => this.usersService.list(criteria).pipe(
+        tap({
+          next: (response) => this.patchState({ isLoading: false, users: response['results'], count: response['count'] }),
+          error: (error) => this.patchState({ isLoading: false, error })
+        }),
+        catchError(() => EMPTY)
+      ))
+    )
+  })
 }
