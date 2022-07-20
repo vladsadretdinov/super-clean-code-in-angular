@@ -1,3 +1,7 @@
+# Super clean code in Angular (feat. @ngrx/component-store) - Part 1 - Theory
+
+Copy-paste from https://www.youtube.com/watch?v=Xk9Omlwk_mU
+
 # SuperCleanCode
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.0.2.
